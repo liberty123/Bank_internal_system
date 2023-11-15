@@ -28,7 +28,7 @@ conn = pymysql.connect(
 )
 cur = conn.cursor()
 # SQL
-sql = "select * from {} WHERE loan_status = ''; ".format(table)
+sql = "select * from {} WHERE loanstatus = ''; ".format(table)
 
 
 def fill_mort_acc(total_acc, mort_acc, total_acc_avg):
@@ -48,28 +48,28 @@ def bulid_data(i):
     :return: dict
     """
     d = {
-        "loan_amnt": i[19],
-        "term": i[20],
-        "int_rate": i[21],
-        "installment": i[22],
-        "grade": i[23],
-        "sub_grade": i[24],
-        "home_ownership": i[25],
-        "annual_inc": i[26],
-        "verification_status": i[27],
-        "issue_d": i[28],
-        "purpose": i[30],
-        "dti": i[31],
-        "earliest_cr_line": i[32],
-        "open_acc": i[33],
-        "pub_rec": i[34],
-        "revol_bal": i[35],
-        "revol_util": i[36],
-        "total_acc": i[37],
-        "initial_list_status": i[38],
-        "application_type": i[39],
-        "pub_rec_bankruptcies": i[40],
-        "mort_acc": i[41],
+        "loan_amnt": i[18],
+        "term": i[19],
+        "int_rate": i[20],
+        "installment": i[21],
+        "grade": i[22],
+        "sub_grade": i[23],
+        "home_ownership": i[24],
+        "annual_inc": i[25],
+        "verification_status": i[26],
+        "issue_d": i[27],
+        "purpose": i[29],
+        "dti": i[30],
+        "earliest_cr_line": i[31],
+        "open_acc": i[32],
+        "pub_rec": i[33],
+        "revol_bal": i[34],
+        "revol_util": i[35],
+        "total_acc": i[36],
+        "initial_list_status": i[37],
+        "application_type": i[38],
+        "pub_rec_bankruptcies": i[39],
+        "mort_acc": i[40],
         "A2": 0,
         "A3": 0,
         "A4": 0,
@@ -181,8 +181,6 @@ def data_preprocess(d):
     :return: dataform data
     """
     df = pd.DataFrame([d])
-    total_acc_avg = df.groupby('total_acc').mean()['mort_acc']
-    df['mort_acc'] = df.apply(lambda x: fill_mort_acc(x['total_acc'], x['mort_acc'], total_acc_avg), axis=1)
     df['term'] = df['term'].apply(lambda term: int(term[:3]))
     df['earliest_cr_year'] = df['earliest_cr_line'].apply(lambda date: int(date[-4:]))
     df = df.drop(['grade', 'verification_status', 'application_type', 'initial_list_status', 'purpose', 'sub_grade',
@@ -202,13 +200,14 @@ def main():
             # preprocess data
             df = data_preprocess(d)
             X_test = df.values
+            X_test = X_test.astype(np.float32)
             # predict
             predictions = model.predict_classes(X_test)
             if predictions[0][0] == 1:
                 Suggestion = "Recommended to adopt"
             else:
                 Suggestion = "Recommendation not adopted"
-            update_sqli = "update {} set loan_status='{}' where id={}".format(table, Suggestion, i[0])
+            update_sqli = "update {} set loanstatus='{}' where id={}".format(table, Suggestion, i[0])
             cur.execute(update_sqli)
             print("end one")
         else:
