@@ -1,0 +1,5 @@
+numpy
+pandas
+pymysql==1.1.0
+tensorflow==2.4.1
+tensorflow-estimator==2.4.0
